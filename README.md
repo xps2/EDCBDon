@@ -1,0 +1,2 @@
+# EDCBDon
+EDCBからMastodonでトートする
