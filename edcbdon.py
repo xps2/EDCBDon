@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from ConfigParser import ConfigParser
 from mastodon import Mastodon
 import sys
+from win32api import GetDiskFreeSpaceEx
 
 parser = ArgumentParser(
     prog="EDCBDon"
@@ -16,7 +17,10 @@ group.add_argument('-t', '--token',
 group.add_argument('toot',
     action='store',
     nargs='?',
-    help=u'toot'
+    help='toot'
+)
+parser.add_argument('--hdd',
+    action='store',
 )
 
 
@@ -53,10 +57,15 @@ def get_access_token():
     )
 
 
-def toot(toot_str):
+def toot(toot_str, hdd_path):
     config = ConfigParser()
     config.readfp(open('edcbdon.ini'))
     section = 'EDCBDon'
+
+    if hdd_path is not None:
+        print hdd_path
+        hdd = GetDiskFreeSpaceEx(hdd_path)
+        toot_str = toot_str + u" 空き容量: {:.2f}".format(hdd[0] / (1024.0 ** 3)) + "GB"
 
     mastodon = Mastodon(
         client_id='edcbdon_clientcred.secret',
@@ -73,7 +82,7 @@ def main():
         get_access_token()
         sys.exit(0)
     elif args.toot:
-        toot(unicode(args.toot,'cp932'))
+        toot(unicode(args.toot, 'cp932'), args.hdd)
     
 if __name__ == '__main__':
     main()
